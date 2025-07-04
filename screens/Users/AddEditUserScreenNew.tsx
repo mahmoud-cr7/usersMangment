@@ -106,63 +106,6 @@ const avatars = [
   "https://avatars.githubusercontent.com/u/46073403",
 ];
 
-const FormField: React.FC<{
-  label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder: string;
-  error?: string;
-  keyboardType?: "default" | "email-address" | "phone-pad";
-}> = ({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  error,
-  keyboardType = "default",
-}) => (
-  <View style={styles.fieldContainer}>
-    <Text style={styles.fieldLabel}>{label}</Text>
-    <TextInput
-      style={[styles.textInput, error && styles.textInputError]}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder}
-      placeholderTextColor="#8E8E93"
-      keyboardType={keyboardType}
-      autoCapitalize={keyboardType === "email-address" ? "none" : "words"}
-    />
-    {error && <Text style={styles.errorText}>{error}</Text>}
-  </View>
-);
-
-const SelectField: React.FC<{
-  label: string;
-  value: string;
-  onPress: () => void;
-  placeholder: string;
-  error?: string;
-  icon?: string;
-}> = ({ label, value, onPress, placeholder, error, icon }) => (
-  <View style={styles.fieldContainer}>
-    <Text style={styles.fieldLabel}>{label}</Text>
-    <TouchableOpacity
-      style={[styles.selectInput, error && styles.textInputError]}
-      onPress={onPress}
-    >
-      <Text style={[styles.selectText, !value && styles.placeholderText]}>
-        {value || placeholder}
-      </Text>
-      <Ionicons
-        name={(icon as any) || "chevron-down"}
-        size={20}
-        color="#8E8E93"
-      />
-    </TouchableOpacity>
-    {error && <Text style={styles.errorText}>{error}</Text>}
-  </View>
-);
-
 const AddEditUserScreen: React.FC = () => {
   const navigation = useNavigation<AddEditUserScreenNavigationProp>();
   const route = useRoute<AddEditUserScreenRouteProp>();
@@ -296,7 +239,7 @@ const AddEditUserScreen: React.FC = () => {
         });
       }
       navigation.goBack();
-    } catch {
+    } catch (error) {
       showToast({
         type: "error",
         title: `Failed to ${isEditing ? "update" : "create"} user`,
@@ -321,6 +264,63 @@ const AddEditUserScreen: React.FC = () => {
       </SafeAreaView>
     );
   }
+
+  const FormField: React.FC<{
+    label: string;
+    value: string;
+    onChangeText: (text: string) => void;
+    placeholder: string;
+    error?: string;
+    keyboardType?: "default" | "email-address" | "phone-pad";
+  }> = ({
+    label,
+    value,
+    onChangeText,
+    placeholder,
+    error,
+    keyboardType = "default",
+  }) => (
+    <View style={styles.fieldContainer}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        style={[styles.textInput, error && styles.textInputError]}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="#8E8E93"
+        keyboardType={keyboardType}
+        autoCapitalize={keyboardType === "email-address" ? "none" : "words"}
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  );
+
+  const SelectField: React.FC<{
+    label: string;
+    value: string;
+    onPress: () => void;
+    placeholder: string;
+    error?: string;
+    icon?: string;
+  }> = ({ label, value, onPress, placeholder, error, icon }) => (
+    <View style={styles.fieldContainer}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TouchableOpacity
+        style={[styles.selectInput, error && styles.textInputError]}
+        onPress={onPress}
+      >
+        <Text style={[styles.selectText, !value && styles.placeholderText]}>
+          {value || placeholder}
+        </Text>
+        <Ionicons
+          name={(icon as any) || "chevron-down"}
+          size={20}
+          color="#8E8E93"
+        />
+      </TouchableOpacity>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -743,5 +743,5 @@ const styles = StyleSheet.create({
 
 export default withAuthProtection(AddEditUserScreen, {
   requireAuth: false,
-  blockGuests: true, // Block guests from adding/editing users
+  blockGuests: false, // Allow guests to add/edit users for demo purposes
 });

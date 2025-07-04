@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { useToast } from "@/contexts/ToastContext";
 import {
   apiService,
   CreateUserData,
@@ -54,26 +53,12 @@ export const useUser = (id: string) => {
 // Hook for creating a user
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: (userData: CreateUserData) => apiService.createUser(userData),
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate and refetch users query
       queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
-
-      showToast({
-        type: "success",
-        title: "User created",
-        message: `${data.firstname} ${data.lastname} has been added successfully`,
-      });
-    },
-    onError: () => {
-      showToast({
-        type: "error",
-        title: "Failed to create user",
-        message: "Please try again later",
-      });
     },
   });
 };
@@ -81,7 +66,6 @@ export const useCreateUser = () => {
 // Hook for updating a user
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: (userData: UpdateUserData) => apiService.updateUser(userData),
@@ -90,19 +74,6 @@ export const useUpdateUser = () => {
       queryClient.setQueryData([USER_QUERY_KEY, data.id], data);
       // Invalidate users list to refresh
       queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
-
-      showToast({
-        type: "success",
-        title: "User updated",
-        message: `${data.firstname} ${data.lastname} has been updated successfully`,
-      });
-    },
-    onError: () => {
-      showToast({
-        type: "error",
-        title: "Failed to update user",
-        message: "Please try again later",
-      });
     },
   });
 };
@@ -110,26 +81,12 @@ export const useUpdateUser = () => {
 // Hook for deleting a user
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: (id: string) => apiService.deleteUser(id),
     onSuccess: () => {
       // Invalidate and refetch users query
       queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
-
-      showToast({
-        type: "success",
-        title: "User deleted",
-        message: "User has been removed successfully",
-      });
-    },
-    onError: () => {
-      showToast({
-        type: "error",
-        title: "Failed to delete user",
-        message: "Please try again later",
-      });
     },
   });
 };

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,10 +14,8 @@ import {
   View,
 } from "react-native";
 
-import BottomSheetLogin from "@/components/BottomSheetLogin";
 import { useToast } from "@/contexts/ToastContext";
 import withAuthProtection from "@/hoc/withAuthProtection";
-import { useAuth } from "@/hooks/useAuth";
 import { useDeleteUser, useUser } from "@/hooks/useUsers";
 import { shareUserProfile } from "@/utils/shareLink";
 import { UsersStackParamList } from "../../navigation/UsersStackNavigator";
@@ -33,26 +31,16 @@ const UserDetailsScreen: React.FC = () => {
   const route = useRoute<UserDetailsScreenRouteProp>();
   const { userId } = route.params;
   const { showToast } = useToast();
-  const { isGuest } = useAuth();
-  const [showLoginSheet, setShowLoginSheet] = useState(false);
 
   // API hooks
   const { data: user, isLoading, isError, refetch } = useUser(userId);
   const deleteUserMutation = useDeleteUser();
 
   const handleEditUser = () => {
-    if (isGuest) {
-      setShowLoginSheet(true);
-      return;
-    }
     navigation.navigate("AddEditUser", { userId });
   };
 
   const handleDeleteUser = () => {
-    if (isGuest) {
-      setShowLoginSheet(true);
-      return;
-    }
     const userName = user ? `${user.firstname} ${user.lastname}` : "this user";
     Alert.alert("Delete User", `Are you sure you want to delete ${userName}?`, [
       { text: "Cancel", style: "cancel" },
@@ -78,10 +66,23 @@ const UserDetailsScreen: React.FC = () => {
     ]);
   };
 
-  const handleShareUser = () => {
+  const handleShareUser = async () => {
     if (user) {
       const userName = `${user.firstname} ${user.lastname}`;
-      shareUserProfile(userId, userName);
+      try {
+        await shareUserProfile(userId, userName);
+        showToast({
+          type: "success",
+          title: "Profile shared successfully",
+          message: `${userName}'s profile link has been shared`,
+        });
+      } catch {
+        showToast({
+          type: "error",
+          title: "Failed to share profile",
+          message: "Please try again",
+        });
+      }
     }
   };
 
@@ -255,13 +256,6 @@ const UserDetailsScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-
-      <BottomSheetLogin
-        isVisible={showLoginSheet}
-        onClose={() => setShowLoginSheet(false)}
-        title="Login Required"
-        message="Please login to manage users"
-      />
     </SafeAreaView>
   );
 };

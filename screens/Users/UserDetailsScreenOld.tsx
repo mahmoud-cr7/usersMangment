@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,13 +14,12 @@ import {
   View,
 } from "react-native";
 
-import BottomSheetLogin from "@/components/BottomSheetLogin";
 import { useToast } from "@/contexts/ToastContext";
 import withAuthProtection from "@/hoc/withAuthProtection";
-import { useAuth } from "@/hooks/useAuth";
 import { useDeleteUser, useUser } from "@/hooks/useUsers";
 import { shareUserProfile } from "@/utils/shareLink";
 import { UsersStackParamList } from "../../navigation/UsersStackNavigator";
+// import { UsersStackParamList } from "@/navigation/UsersStackNavigator";
 
 type UserDetailsScreenNavigationProp = NativeStackNavigationProp<
   UsersStackParamList,
@@ -33,49 +32,43 @@ const UserDetailsScreen: React.FC = () => {
   const route = useRoute<UserDetailsScreenRouteProp>();
   const { userId } = route.params;
   const { showToast } = useToast();
-  const { isGuest } = useAuth();
-  const [showLoginSheet, setShowLoginSheet] = useState(false);
 
   // API hooks
   const { data: user, isLoading, isError, refetch } = useUser(userId);
   const deleteUserMutation = useDeleteUser();
 
   const handleEditUser = () => {
-    if (isGuest) {
-      setShowLoginSheet(true);
-      return;
-    }
     navigation.navigate("AddEditUser", { userId });
   };
 
   const handleDeleteUser = () => {
-    if (isGuest) {
-      setShowLoginSheet(true);
-      return;
-    }
     const userName = user ? `${user.firstname} ${user.lastname}` : "this user";
-    Alert.alert("Delete User", `Are you sure you want to delete ${userName}?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteUserMutation.mutateAsync(userId);
-            showToast({
-              type: "success",
-              title: "User deleted successfully",
-            });
-            navigation.goBack();
-          } catch {
-            showToast({
-              type: "error",
-              title: "Failed to delete user",
-            });
-          }
+    Alert.alert(
+      "Delete User",
+      `Are you sure you want to delete ${userName}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteUserMutation.mutateAsync(userId);
+              showToast({ 
+                type: "success", 
+                title: "User deleted successfully" 
+              });
+              navigation.goBack();
+            } catch {
+              showToast({ 
+                type: "error", 
+                title: "Failed to delete user" 
+              });
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleShareUser = () => {
@@ -86,10 +79,10 @@ const UserDetailsScreen: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
@@ -137,12 +130,9 @@ const UserDetailsScreen: React.FC = () => {
           <Ionicons name="alert-circle-outline" size={64} color="#FF3B30" />
           <Text style={styles.errorTitle}>User not found</Text>
           <Text style={styles.errorSubtitle}>
-            The user you are looking for does not exist or has been deleted.
+            The user you're looking for doesn't exist or has been deleted.
           </Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => refetch()}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
@@ -157,12 +147,7 @@ const UserDetailsScreen: React.FC = () => {
   }> = ({ icon, label, value }) => (
     <View style={styles.detailRow}>
       <View style={styles.detailRowLeft}>
-        <Ionicons
-          name={icon as any}
-          size={20}
-          color="#007AFF"
-          style={styles.detailIcon}
-        />
+        <Ionicons name={icon as any} size={20} color="#007AFF" style={styles.detailIcon} />
         <Text style={styles.detailLabel}>{label}</Text>
       </View>
       <Text style={styles.detailValue}>{value}</Text>
@@ -219,9 +204,21 @@ const UserDetailsScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact Information</Text>
           <View style={styles.sectionContent}>
-            <DetailRow icon="mail-outline" label="Email" value={user.email} />
-            <DetailRow icon="call-outline" label="Phone" value={user.phone} />
-            <DetailRow icon="location-outline" label="City" value={user.city} />
+            <DetailRow
+              icon="mail-outline"
+              label="Email"
+              value={user.email}
+            />
+            <DetailRow
+              icon="call-outline"
+              label="Phone"
+              value={user.phone}
+            />
+            <DetailRow
+              icon="location-outline"
+              label="City"
+              value={user.city}
+            />
           </View>
         </View>
 
@@ -238,7 +235,11 @@ const UserDetailsScreen: React.FC = () => {
               label="Birth Date"
               value={formatDate(user.birthdate)}
             />
-            <DetailRow icon="time-outline" label="User ID" value={user.id} />
+            <DetailRow
+              icon="time-outline"
+              label="User ID"
+              value={user.id}
+            />
           </View>
         </View>
 
@@ -255,13 +256,68 @@ const UserDetailsScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+    </SafeAreaView>
+  );
+};
+        style: "destructive",
+        onPress: () => {
+          // In a real app, you would delete the user here
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
 
-      <BottomSheetLogin
-        isVisible={showLoginSheet}
-        onClose={() => setShowLoginSheet(false)}
-        title="Login Required"
-        message="Please login to manage users"
-      />
+  const DetailRow: React.FC<{ label: string; value: string }> = ({
+    label,
+    value,
+  }) => (
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.profileSection}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {mockUser.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </Text>
+          </View>
+          <Text style={styles.userName}>{mockUser.name}</Text>
+          <Text style={styles.userRole}>{mockUser.role}</Text>
+        </View>
+
+        <View style={styles.detailsSection}>
+          <Text style={styles.sectionTitle}>Details</Text>
+          <DetailRow label="Email" value={mockUser.email} />
+          <DetailRow label="Phone" value={mockUser.phone} />
+          <DetailRow label="Department" value={mockUser.department} />
+          <DetailRow label="Join Date" value={mockUser.joinDate} />
+          <DetailRow label="Status" value={mockUser.status} />
+        </View>
+
+        <View style={styles.actionSection}>
+          <TouchableOpacity style={styles.editButton} onPress={handleEditUser}>
+            <Ionicons name="create-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.editButtonText}>Edit User</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteUser}
+          >
+            <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.deleteButtonText}>Delete User</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -271,74 +327,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F2F2F7",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000000",
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  actionButton: {
-    padding: 8,
-  },
   content: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#8E8E93",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#FF3B30",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  errorSubtitle: {
-    fontSize: 16,
-    color: "#8E8E93",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  retryButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
   profileSection: {
     backgroundColor: "#FFFFFF",
@@ -346,21 +336,14 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     marginBottom: 16,
   },
-  avatarContainer: {
-    marginBottom: 16,
-  },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: "#007AFF",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 16,
   },
   avatarText: {
     fontSize: 24,
@@ -369,66 +352,80 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: "bold",
     color: "#000000",
     marginBottom: 4,
   },
-  userHandle: {
+  userRole: {
     fontSize: 16,
     color: "#8E8E93",
   },
-  section: {
+  detailsSection: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    color: "#8E8E93",
-    marginHorizontal: 16,
-    marginBottom: 8,
-    textTransform: "uppercase",
-  },
-  sectionContent: {
-    backgroundColor: "#FFFFFF",
+    color: "#000000",
+    marginBottom: 16,
   },
   detailRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    alignItems: "center",
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#F2F2F7",
   },
-  detailRowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  detailIcon: {
-    marginRight: 12,
-  },
   detailLabel: {
     fontSize: 16,
-    color: "#000000",
+    color: "#8E8E93",
     flex: 1,
   },
   detailValue: {
     fontSize: 16,
-    color: "#8E8E93",
+    color: "#000000",
+    fontWeight: "500",
+    flex: 2,
     textAlign: "right",
-    flexShrink: 1,
   },
-  deleteButton: {
+  actionSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+  },
+  editButton: {
+    backgroundColor: "#007AFF",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
+    marginBottom: 12,
   },
-  deleteButtonText: {
+  editButtonText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-    color: "#FF3B30",
+    marginLeft: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#FF3B30",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
     marginLeft: 8,
   },
 });
@@ -436,6 +433,7 @@ const styles = StyleSheet.create({
 export default withAuthProtection(UserDetailsScreen, {
   requireAuth: false,
   blockGuests: true,
-  customGuestTitle: "Login Required",
-  customGuestMessage: "Please login to view user details",
+  customGuestTitle: "User Details Restricted",
+  customGuestMessage:
+    "Login to view detailed user information and perform actions",
 });
