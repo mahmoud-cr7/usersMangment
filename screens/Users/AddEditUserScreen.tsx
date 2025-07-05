@@ -6,6 +6,8 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   SafeAreaView,
@@ -14,6 +16,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
@@ -275,10 +278,10 @@ const AddEditUserScreen: React.FC = () => {
           avatar: form.avatar,
         };
         await updateUserMutation.mutateAsync(updateData);
-        showToast({
-          type: "success",
-          title: "User updated successfully",
-        });
+        // showToast({
+        //   type: "success",
+        //   title: "User updated successfully",
+        // });
       } else {
         const createData: CreateUserData = {
           username: form.username,
@@ -290,10 +293,10 @@ const AddEditUserScreen: React.FC = () => {
           avatar: form.avatar,
         };
         await createUserMutation.mutateAsync(createData);
-        showToast({
-          type: "success",
-          title: "User created successfully",
-        });
+        // showToast({
+        //   type: "success",
+        //   title: "User created successfully",
+        // });
       }
       navigation.goBack();
     } catch {
@@ -314,10 +317,18 @@ const AddEditUserScreen: React.FC = () => {
   if (isLoadingUser && isEditing) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>Loading user...</Text>
-        </View>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <Text style={styles.loadingText}>Loading user...</Text>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -345,86 +356,118 @@ const AddEditUserScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.avatarSection}>
-          <Text style={styles.sectionTitle}>Profile Picture</Text>
-          <TouchableOpacity
-            style={styles.avatarContainer}
-            onPress={() => setShowAvatarPicker(true)}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 80}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
           >
-            <Image source={{ uri: form.avatar }} style={styles.avatarImage} />
-            <View style={styles.avatarOverlay}>
-              <Ionicons name="camera" size={24} color="#FFFFFF" />
+            <View style={styles.avatarSection}>
+              <Text style={styles.sectionTitle}>Profile Picture</Text>
+              <TouchableOpacity
+                style={styles.avatarContainer}
+                onPress={() => setShowAvatarPicker(true)}
+              >
+                <Image
+                  source={{ uri: form.avatar }}
+                  style={styles.avatarImage}
+                />
+                <View style={styles.avatarOverlay}>
+                  <Ionicons name="camera" size={24} color="#FFFFFF" />
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.form}>
-          <FormField
-            label="Username"
-            value={form.username}
-            onChangeText={(text) => updateField("username", text)}
-            placeholder="Enter username"
-            error={errors.username}
-          />
-
-          <View style={styles.nameRow}>
-            <View style={styles.nameField}>
+            <View style={styles.form}>
               <FormField
-                label="First Name"
-                value={form.firstname}
-                onChangeText={(text) => updateField("firstname", text)}
-                placeholder="First name"
-                error={errors.firstname}
+                label="Username"
+                value={form.username}
+                onChangeText={(text) => updateField("username", text)}
+                placeholder="Enter username"
+                error={errors.username}
+              />
+
+              <View style={styles.nameRow}>
+                <View style={styles.nameField}>
+                  <FormField
+                    label="First Name"
+                    value={form.firstname}
+                    onChangeText={(text) => updateField("firstname", text)}
+                    placeholder="First name"
+                    error={errors.firstname}
+                  />
+                </View>
+                <View style={styles.nameField}>
+                  <FormField
+                    label="Last Name"
+                    value={form.lastname}
+                    onChangeText={(text) => updateField("lastname", text)}
+                    placeholder="Last name"
+                    error={errors.lastname}
+                  />
+                </View>
+              </View>
+
+              <FormField
+                label="Email"
+                value={form.email}
+                onChangeText={(text) => updateField("email", text)}
+                placeholder="Enter email address"
+                keyboardType="email-address"
+                error={errors.email}
+              />
+
+              <FormField
+                label="Phone"
+                value={form.phone}
+                onChangeText={(text) => updateField("phone", text)}
+                placeholder="Enter phone number"
+                keyboardType="phone-pad"
+                error={errors.phone}
+              />
+
+              <SelectField
+                label="City"
+                value={form.city}
+                onPress={() => setShowCityPicker(true)}
+                placeholder="Select city"
+                error={errors.city}
+                icon="location-outline"
+              />
+
+              <SelectField
+                label="Birth Date"
+                value={formatDate(form.birthdate)}
+                onPress={() => setShowDatePicker(true)}
+                placeholder="Select birth date"
+                icon="calendar-outline"
               />
             </View>
-            <View style={styles.nameField}>
-              <FormField
-                label="Last Name"
-                value={form.lastname}
-                onChangeText={(text) => updateField("lastname", text)}
-                placeholder="Last name"
-                error={errors.lastname}
-              />
-            </View>
-          </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
 
-          <FormField
-            label="Email"
-            value={form.email}
-            onChangeText={(text) => updateField("email", text)}
-            placeholder="Enter email address"
-            keyboardType="email-address"
-            error={errors.email}
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={form.birthdate}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                updateField("birthdate", selectedDate);
+              }
+            }}
+            maximumDate={new Date()}
           />
-
-          <FormField
-            label="Phone"
-            value={form.phone}
-            onChangeText={(text) => updateField("phone", text)}
-            placeholder="Enter phone number"
-            keyboardType="phone-pad"
-            error={errors.phone}
-          />
-
-          <SelectField
-            label="City"
-            value={form.city}
-            onPress={() => setShowCityPicker(true)}
-            placeholder="Select city"
-            error={errors.city}
-            icon="location-outline"
-          />
-
-          <SelectField
-            label="Birth Date"
-            value={formatDate(form.birthdate)}
-            onPress={() => setShowDatePicker(true)}
-            placeholder="Select birth date"
-            icon="calendar-outline"
-          />
-        </View>
-      </ScrollView>
+        )}
+      </KeyboardAvoidingView>
 
       {/* City Picker Modal */}
       <Modal
@@ -503,22 +546,6 @@ const AddEditUserScreen: React.FC = () => {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-
-      {/* Date Picker */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={form.birthdate}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) {
-              updateField("birthdate", selectedDate);
-            }
-          }}
-          maximumDate={new Date()}
-        />
-      )}
     </SafeAreaView>
   );
 };
@@ -566,6 +593,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra padding for keyboard
+    flexGrow: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -615,6 +646,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 12,
     padding: 16,
+    marginBottom: 20, // Add bottom margin for keyboard space
   },
   fieldContainer: {
     marginBottom: 20,

@@ -40,6 +40,7 @@ const UsersStackNavigator: React.FC = () => {
         component={UserDetailsScreen}
         options={{
           title: "User Details",
+          headerShown: false,
         }}
       />
       <Stack.Screen

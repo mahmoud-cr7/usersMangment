@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -50,13 +50,24 @@ const UsersScreen: React.FC = () => {
     navigation.navigate("UserDetails", { userId });
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = useCallback(() => {
     if (isGuest) {
       setShowLoginSheet(true);
       return;
     }
     navigation.navigate("AddEditUser", {});
-  };
+  }, [isGuest, navigation, setShowLoginSheet]);
+
+  // Set the header button
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity style={{ padding: 8 }} onPress={handleAddUser}>
+          <Ionicons name="add" size={24} color="#007AFF" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, handleAddUser]);
 
   const handleEditUser = (user: User) => {
     if (isGuest) {
@@ -89,8 +100,15 @@ const UsersScreen: React.FC = () => {
     refetch();
   };
 
-  // Flatten the pages data for FlatList
-  const allUsers = data?.pages.flat() ?? [];
+  // Flatten the pages data for FlatList and remove duplicates
+  const allUsers = React.useMemo(() => {
+    const flatUsers = data?.pages.flat() ?? [];
+    // Remove duplicates based on user ID
+    const uniqueUsers = flatUsers.filter(
+      (user, index, self) => index === self.findIndex((u) => u.id === user.id)
+    );
+    return uniqueUsers;
+  }, [data?.pages]);
 
   const renderUserItem = ({ item }: { item: User }) => (
     <UserCard
@@ -169,13 +187,6 @@ const UsersScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Users</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddUser}>
-          <Ionicons name="add" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
-
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Ionicons
@@ -246,29 +257,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#000000",
-  },
-  addButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    marginTop: 0, // Ensure no margin at the top
   },
   searchContainer: {
     backgroundColor: "#FFFFFF",
