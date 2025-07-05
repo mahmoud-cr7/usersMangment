@@ -8,7 +8,10 @@
     "scheme": "usersmgmt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.usersmanagement",
@@ -17,7 +20,9 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "usersmgmt",
-            "CFBundleURLSchemes": ["usersmgmt"]
+            "CFBundleURLSchemes": [
+              "usersmgmt"
+            ]
           }
         ]
       }
@@ -38,7 +43,10 @@
               "scheme": "usersmgmt"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -55,7 +63,10 @@
               "pathPrefix": "/user"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -80,12 +91,11 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {
-        "origin": false
-      },
+      "router": {},
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "30732253-f7bb-48df-a2eb-b712655cdf09"
       }
-    }
+    },
+    "owner": "mawageeh"
   }
 }
