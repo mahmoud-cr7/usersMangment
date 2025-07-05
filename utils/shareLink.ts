@@ -66,20 +66,7 @@ export const showLinkOptions = (userId: string, userName: string) => {
       text: "Copy Deep Link",
       onPress: () => copyUserProfileLink(userId, userName),
     },
-    {
-      text: "Copy Web Link",
-      onPress: async () => {
-        try {
-          await Clipboard.setStringAsync(webUrl);
-          Alert.alert(
-            "Web Link Copied",
-            `Web link copied to clipboard:\n\n${webUrl}`
-          );
-        } catch {
-          Alert.alert("Error", "Unable to copy web link");
-        }
-      },
-    },
+
     {
       text: "Cancel",
       style: "cancel",

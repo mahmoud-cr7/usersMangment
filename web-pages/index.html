@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .app-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin: 10px;
+        }
+
+        .app-link:hover {
+            background: #5a6fd8;
+        }
+
+        .download-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔗 Users Management App</h1>
+        <p>Click the links below to test deep linking:</p>
+
+        <a href="usersmgmt://user/14" class="app-link">📱 Open User 14 (Custom Scheme)</a>
+        <br>
+        <a href="https://usersmanagement-linkss-3p58oor4w-mahmouds-projects-414b5cea.vercel.app/user/14"
+            class="app-link">🌐 Open User 14 (App Link)</a>
+        <br>
+        <a href="https://usersmanagement-linkss-3p58oor4w-mahmouds-projects-414b5cea.vercel.app/user/18"
+            class="app-link">🌐 Open User 18 (App Link)</a>
+
+        <div class="download-section">
+            <p><small>If the app doesn't open, make sure you have the Users Management app installed on your
+                    device.</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Optional: Auto-redirect to app if on mobile
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Check if we're on a specific user page
+        const path = window.location.pathname;
+        const userMatch = path.match(/\/user\/(\d+)/);
+
+        if (userMatch && isMobile()) {
+            const userId = userMatch[1];
+            const appSchemeUrl = `usersmgmt://user/${userId}`;
+
+            // Try to open the app
+            setTimeout(() => {
+                window.location.href = appSchemeUrl;
+            }, 1000);
+
+            // Show a message
+            document.querySelector('.container').innerHTML = `
+                <h1>🚀 Opening App...</h1>
+                <p>Redirecting to User ${userId} in the app...</p>
+                <p><small>If the app doesn't open automatically, <a href="${appSchemeUrl}">click here</a></small></p>
+            `;
+        }
+    </script>
+</body>
+
+</html>

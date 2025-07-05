@@ -8,10 +8,7 @@
     "scheme": "usersmgmt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.usersmanagement",
@@ -20,9 +17,7 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "usersmgmt",
-            "CFBundleURLSchemes": [
-              "usersmgmt"
-            ]
+            "CFBundleURLSchemes": ["usersmgmt"]
           }
         ]
       }
@@ -43,10 +38,7 @@
               "scheme": "usersmgmt"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         },
         {
           "action": "VIEW",
@@ -54,19 +46,11 @@
           "data": [
             {
               "scheme": "https",
-              "host": "usersmanagement.app",
-              "pathPrefix": "/user"
-            },
-            {
-              "scheme": "https",
-              "host": "www.usersmanagement.app",
+              "host": "usersmanagement-linkss-3p58oor4w-mahmouds-projects-414b5cea.vercel.app",
               "pathPrefix": "/user"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
