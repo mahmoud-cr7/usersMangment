@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 
 import BottomSheetLogin from "@/components/BottomSheetLogin";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileScreen from "@/screens/Profile/ProfileScreen";
 import UsersStackNavigator from "./UsersStackNavigator";
-// import UsersStackNavigator from "./UsersStackNavigator";
 
 export type BottomTabsParamList = {
   UsersStack: undefined;
@@ -16,9 +15,24 @@ export type BottomTabsParamList = {
 
 const Tab = createBottomTabNavigator<BottomTabsParamList>();
 
-const BottomTabsNavigator: React.FC = () => {
+interface BottomTabsNavigatorProps {
+  setIsHandlingDeepLink?: (value: boolean) => void;
+}
+
+const BottomTabsNavigator: React.FC<BottomTabsNavigatorProps> = ({ setIsHandlingDeepLink }) => {
   const { isGuest } = useAuth();
   const [showLoginSheet, setShowLoginSheet] = useState(false);
+
+  // Handle deep link completion
+  useEffect(() => {
+    if (setIsHandlingDeepLink) {
+      const timer = setTimeout(() => {
+        setIsHandlingDeepLink(false);
+      }, 2000); // Wait 2 seconds after mount to ensure deep link is handled
+
+      return () => clearTimeout(timer);
+    }
+  }, [setIsHandlingDeepLink]);
 
   return (
     <>
@@ -61,8 +75,8 @@ const BottomTabsNavigator: React.FC = () => {
           listeners={({ navigation }) => ({
             tabPress: (e) => {
               if (isGuest) {
-                e.preventDefault(); // Prevent navigation
-                setShowLoginSheet(true); // Show login sheet instead
+                e.preventDefault();
+                setShowLoginSheet(true);
               }
             },
           })}

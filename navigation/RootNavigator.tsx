@@ -37,7 +37,7 @@ const AppNavigator: React.FC = () => {
       console.log("Initial URL:", url);
     });
   }, []);
-  
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -66,6 +66,7 @@ const RootNavigator: React.FC = () => {
       "https://usersmanagement.app",
     ],
     config: {
+      // Define the main structure when authenticated
       screens: {
         UsersStack: {
           screens: {
@@ -85,17 +86,50 @@ const RootNavigator: React.FC = () => {
           },
         },
         Profile: "profile",
+        Login: "login",
       },
     },
   };
 
-  // Handle deep links when app is opened
+  // Global deep link handling
+  const navigationRef = React.useRef<any>(null);
+  const [pendingDeepLink, setPendingDeepLink] = React.useState<string | null>(
+    null
+  );
+
   React.useEffect(() => {
     const handleDeepLink = (url: string | null) => {
       if (url) {
-        console.log("Deep link received:", url);
-        // The NavigationContainer will automatically handle the routing
-        // based on the linking configuration above
+        console.log("🔗 Deep link received:", url);
+
+        // Parse the URL
+        const parsed = Linking.parse(url);
+        console.log("📝 Parsed URL:", parsed);
+
+        // Check if this is a user deep link
+        if (url.includes("user/")) {
+          // Extract user ID from the URL - handle both "user/14" and "/user/14" patterns
+          const userIdMatch = url.match(/user\/(\d+)/);
+          if (userIdMatch) {
+            const userId = userIdMatch[1];
+            console.log("👤 Deep link to user:", userId);
+
+            // Store the pending deep link if navigation isn't ready yet
+            if (navigationRef.current?.isReady?.()) {
+              console.log("🚀 Navigating immediately to user:", userId);
+              navigationRef.current.navigate("UsersStack", {
+                screen: "UserDetails",
+                params: { userId },
+              });
+            } else {
+              console.log(
+                "⏳ Navigation not ready, storing pending deep link for user:",
+                userId
+              );
+              setPendingDeepLink(userId);
+            }
+          }
+        }
       }
     };
 
@@ -112,12 +146,31 @@ const RootNavigator: React.FC = () => {
     };
   }, []);
 
+  // Handle pending deep link when navigation becomes ready
+  React.useEffect(() => {
+    if (pendingDeepLink && navigationRef.current?.isReady?.()) {
+      console.log(
+        "🚀 Navigation ready, handling pending deep link for user:",
+        pendingDeepLink
+      );
+
+      // Add a small delay to ensure navigation state is fully initialized
+      setTimeout(() => {
+        navigationRef.current?.navigate("UsersStack", {
+          screen: "UserDetails",
+          params: { userId: pendingDeepLink },
+        });
+        setPendingDeepLink(null);
+      }, 500);
+    }
+  }, [pendingDeepLink]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <AuthProvider>
           <NavigationIndependentTree>
-            <NavigationContainer linking={linking as any}>
+            <NavigationContainer ref={navigationRef} linking={linking as any}>
               <AppNavigator />
             </NavigationContainer>
           </NavigationIndependentTree>
