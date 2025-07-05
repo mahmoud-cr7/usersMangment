@@ -7,13 +7,10 @@ export default function UserDeepLinkHandler() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to the main app with the user ID
-    // Since the main navigation is handled by RootNavigator,
-    // we need to redirect to the index route and let RootNavigator handle it
+    // Redirect to the dedicated deeplink user details screen
     if (id) {
-      console.log("Deep link handler: redirecting to user", id);
-      // Navigate to the main app which will use RootNavigator
-      router.replace("/");
+      console.log("Deep link handler: redirecting to deeplink user screen", id);
+      router.replace({ pathname: "/deeplink/user/[id]", params: { id } });
     }
   }, [id, router]);
 

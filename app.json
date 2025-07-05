@@ -46,7 +46,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "*.usersmanagement.app",
+              "host": "usersmanagement.app",
+              "pathPrefix": "/user"
+            },
+            {
+              "scheme": "https",
+              "host": "www.usersmanagement.app",
               "pathPrefix": "/user"
             }
           ],

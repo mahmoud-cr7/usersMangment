@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -15,29 +15,38 @@ import {
 } from "react-native";
 
 import BottomSheetLogin from "@/components/BottomSheetLogin";
-import { useToast } from "@/contexts/ToastContext";
-import withAuthProtection from "@/hoc/withAuthProtection";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastProvider, useToast } from "@/contexts/ToastContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeleteUser, useUser } from "@/hooks/useUsers";
 import { showLinkOptions, testDeepLink } from "@/utils/shareLink";
-import { UsersStackParamList } from "../../navigation/UsersStackNavigator";
 
-type UserDetailsScreenNavigationProp = NativeStackNavigationProp<
-  UsersStackParamList,
-  "UserDetails"
->;
-type UserDetailsScreenRouteProp = RouteProp<UsersStackParamList, "UserDetails">;
+// Create a client for this screen
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const UserDetailsScreen: React.FC = () => {
-  const navigation = useNavigation<UserDetailsScreenNavigationProp>();
-  const route = useRoute<UserDetailsScreenRouteProp>();
-  const { userId } = route.params;
+function DeepLinkUserDetailsContent() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { showToast } = useToast();
-  const { isGuest } = useAuth();
+  const { isGuest, continueAsGuest } = useAuth();
   const [showLoginSheet, setShowLoginSheet] = useState(false);
-  console.log("UserDetails route.params:", route.params);
+
+  console.log("DeepLink UserDetails params:", { id });
+
+  // Set user as guest if not authenticated
+  React.useEffect(() => {
+    continueAsGuest();
+  }, []);
+
   // API hooks
-  const { data: user, isLoading, isError, refetch } = useUser(userId);
+  const { data: user, isLoading, isError, refetch } = useUser(id!);
   const deleteUserMutation = useDeleteUser();
 
   const handleEditUser = () => {
@@ -45,7 +54,9 @@ const UserDetailsScreen: React.FC = () => {
       setShowLoginSheet(true);
       return;
     }
-    navigation.navigate("AddEditUser", { userId });
+    // Navigate to main app for editing
+    router.push("/");
+    // Note: Could also navigate to a specific edit screen if needed
   };
 
   const handleDeleteUser = () => {
@@ -61,12 +72,12 @@ const UserDetailsScreen: React.FC = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteUserMutation.mutateAsync(userId);
+            await deleteUserMutation.mutateAsync(id!);
             showToast({
               type: "success",
               title: "User deleted successfully",
             });
-            navigation.goBack();
+            router.back();
           } catch {
             showToast({
               type: "error",
@@ -81,12 +92,16 @@ const UserDetailsScreen: React.FC = () => {
   const handleShareUser = () => {
     if (user) {
       const userName = `${user.firstname} ${user.lastname}`;
-      showLinkOptions(userId, userName);
+      showLinkOptions(id!, userName);
     }
   };
 
   const handleTestDeepLink = () => {
-    testDeepLink(userId);
+    testDeepLink(id!);
+  };
+
+  const handleGoToMainApp = () => {
+    router.push("/");
   };
 
   const formatDate = (dateString: string) => {
@@ -109,12 +124,17 @@ const UserDetailsScreen: React.FC = () => {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           >
             <Ionicons name="arrow-back" size={24} color="#007AFF" />
           </TouchableOpacity>
           <Text style={styles.title}>User Details</Text>
-          <View style={styles.headerActions} />
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleGoToMainApp}
+          >
+            <Ionicons name="home-outline" size={20} color="#007AFF" />
+          </TouchableOpacity>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
@@ -130,12 +150,17 @@ const UserDetailsScreen: React.FC = () => {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           >
             <Ionicons name="arrow-back" size={24} color="#007AFF" />
           </TouchableOpacity>
           <Text style={styles.title}>User Details</Text>
-          <View style={styles.headerActions} />
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleGoToMainApp}
+          >
+            <Ionicons name="home-outline" size={20} color="#007AFF" />
+          </TouchableOpacity>
         </View>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#FF3B30" />
@@ -178,18 +203,18 @@ const UserDetailsScreen: React.FC = () => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
         <Text style={styles.title}>User Details</Text>
         <View style={styles.headerActions}>
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={styles.actionButton}
-            onPress={handleTestDeepLink}
+            onPress={handleGoToMainApp}
           >
-            <Ionicons name="link-outline" size={20} color="#007AFF" />
-          </TouchableOpacity> */}
+            <Ionicons name="home-outline" size={20} color="#007AFF" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleShareUser}
@@ -258,6 +283,14 @@ const UserDetailsScreen: React.FC = () => {
           <View style={styles.sectionContent}>
             <TouchableOpacity
               style={styles.actionButtonLarge}
+              onPress={handleGoToMainApp}
+            >
+              <Ionicons name="home-outline" size={20} color="#007AFF" />
+              <Text style={styles.actionButtonText}>Go to Main App</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButtonLarge}
               onPress={handleShareUser}
             >
               <Ionicons name="share-outline" size={20} color="#007AFF" />
@@ -291,7 +324,7 @@ const UserDetailsScreen: React.FC = () => {
       />
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -475,9 +508,15 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withAuthProtection(UserDetailsScreen, {
-  requireAuth: false,
-  blockGuests: false,
-  customGuestTitle: "Login Required",
-  customGuestMessage: "Please login to view user details",
-});
+// Main export component with providers
+export default function DeepLinkUserDetailsScreen() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthProvider>
+          <DeepLinkUserDetailsContent />
+        </AuthProvider>
+      </ToastProvider>
+    </QueryClientProvider>
+  );
+}
