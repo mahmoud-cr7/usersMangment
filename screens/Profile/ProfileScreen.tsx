@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import {
   Alert,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,11 +11,13 @@ import {
   View,
 } from "react-native";
 
+import DeepLinkDebugger from "@/components/DeepLinkDebugger";
 import withAuthProtection from "@/hoc/withAuthProtection";
 import { useAuth } from "@/hooks/useAuth";
 
 const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
+  const [showDebugger, setShowDebugger] = useState(false);
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -138,6 +141,18 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Developer Tools</Text>
+          <View style={styles.sectionContent}>
+            <ProfileRow
+              icon="link-outline"
+              label="Deep Link Debugger"
+              onPress={() => setShowDebugger(true)}
+              showChevron
+            />
+          </View>
+        </View> */}
+
         <View style={styles.section}>
           <View style={styles.sectionContent}>
             <TouchableOpacity
@@ -150,6 +165,34 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Deep Link Debugger Modal */}
+      {/* <Modal
+        visible={showDebugger}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: "#e0e0e0",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "600" }}>
+              Deep Link Debugger
+            </Text>
+            <TouchableOpacity onPress={() => setShowDebugger(false)}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          <DeepLinkDebugger />
+        </SafeAreaView>
+      </Modal> */}
     </SafeAreaView>
   );
 };
@@ -158,7 +201,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
-    marginTop: 30, 
+    marginTop: 30,
   },
   content: {
     flex: 1,

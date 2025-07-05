@@ -19,7 +19,7 @@ import { useToast } from "@/contexts/ToastContext";
 import withAuthProtection from "@/hoc/withAuthProtection";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeleteUser, useUser } from "@/hooks/useUsers";
-import { shareUserProfile } from "@/utils/shareLink";
+import { showLinkOptions, testDeepLink } from "@/utils/shareLink";
 import { UsersStackParamList } from "../../navigation/UsersStackNavigator";
 
 type UserDetailsScreenNavigationProp = NativeStackNavigationProp<
@@ -35,7 +35,7 @@ const UserDetailsScreen: React.FC = () => {
   const { showToast } = useToast();
   const { isGuest } = useAuth();
   const [showLoginSheet, setShowLoginSheet] = useState(false);
-
+  console.log("UserDetails route.params:", route.params);
   // API hooks
   const { data: user, isLoading, isError, refetch } = useUser(userId);
   const deleteUserMutation = useDeleteUser();
@@ -81,8 +81,12 @@ const UserDetailsScreen: React.FC = () => {
   const handleShareUser = () => {
     if (user) {
       const userName = `${user.firstname} ${user.lastname}`;
-      shareUserProfile(userId, userName);
+      showLinkOptions(userId, userName);
     }
+  };
+
+  const handleTestDeepLink = () => {
+    testDeepLink(userId);
   };
 
   const formatDate = (dateString: string) => {
@@ -180,6 +184,12 @@ const UserDetailsScreen: React.FC = () => {
         </TouchableOpacity>
         <Text style={styles.title}>User Details</Text>
         <View style={styles.headerActions}>
+          {/* <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleTestDeepLink}
+          >
+            <Ionicons name="link-outline" size={20} color="#007AFF" />
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleShareUser}
@@ -244,7 +254,24 @@ const UserDetailsScreen: React.FC = () => {
 
         {/* Actions */}
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Actions</Text>
           <View style={styles.sectionContent}>
+            <TouchableOpacity
+              style={styles.actionButtonLarge}
+              onPress={handleShareUser}
+            >
+              <Ionicons name="share-outline" size={20} color="#007AFF" />
+              <Text style={styles.actionButtonText}>Share Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButtonLarge}
+              onPress={handleTestDeepLink}
+            >
+              <Ionicons name="link-outline" size={20} color="#007AFF" />
+              <Text style={styles.actionButtonText}>Test Deep Links</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={handleDeleteUser}
@@ -270,7 +297,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
-    marginTop:40, 
+    marginTop: 40,
   },
   header: {
     flexDirection: "row",
@@ -430,6 +457,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FF3B30",
+    marginLeft: 8,
+  },
+  actionButtonLarge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2F2F7",
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#007AFF",
     marginLeft: 8,
   },
 });

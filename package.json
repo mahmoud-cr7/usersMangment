@@ -16,7 +16,11 @@
     "android:clean": "cd android && gradlew clean",
     "android:release": "cd android && gradlew assembleRelease",
     "android:bundle": "cd android && gradlew bundleRelease",
-    "android:build": "npm run android:clean && npm run android:release"
+    "android:build": "npm run android:clean && npm run android:release",
+    "test:deeplinks": "scripts\\test-deeplinks.bat",
+    "test:simple": "scripts\\test-deeplinks.bat",
+    "deeplink:user": "npx uri-scheme open usersmgmt://user/8 --android",
+    "deeplink:users": "npx uri-scheme open usersmgmt://users --android"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -52,7 +56,8 @@
     "react-native-screens": "~4.11.1",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "expo-clipboard": "~7.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

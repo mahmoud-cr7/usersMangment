@@ -4,7 +4,7 @@ import {
 } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -32,7 +32,12 @@ const AppNavigator: React.FC = () => {
     isAuthenticated,
     isGuest,
   });
-
+  useEffect(() => {
+    Linking.getInitialURL().then((url) => {
+      console.log("Initial URL:", url);
+    });
+  }, []);
+  
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -54,13 +59,23 @@ const AppNavigator: React.FC = () => {
 
 const RootNavigator: React.FC = () => {
   const linking = {
-    prefixes: [Linking.createURL("/"), "usersmgmt://"],
+    prefixes: [
+      Linking.createURL("/"),
+      "usersmgmt://",
+      "https://*.usersmanagement.app",
+      "https://usersmanagement.app",
+    ],
     config: {
       screens: {
         UsersStack: {
           screens: {
             UsersList: "users",
-            UserDetails: "user/:userId",
+            UserDetails: {
+              path: "user/:userId",
+              parse: {
+                userId: (userId: string) => userId,
+              },
+            },
             AddEditUser: {
               path: "user/:userId/edit",
               parse: {
@@ -73,6 +88,29 @@ const RootNavigator: React.FC = () => {
       },
     },
   };
+
+  // Handle deep links when app is opened
+  React.useEffect(() => {
+    const handleDeepLink = (url: string | null) => {
+      if (url) {
+        console.log("Deep link received:", url);
+        // The NavigationContainer will automatically handle the routing
+        // based on the linking configuration above
+      }
+    };
+
+    // Handle initial URL when app is opened from a link
+    Linking.getInitialURL().then(handleDeepLink);
+
+    // Handle URLs when app is already open
+    const subscription = Linking.addEventListener("url", (event) => {
+      handleDeepLink(event.url);
+    });
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
